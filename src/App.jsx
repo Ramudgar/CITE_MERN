@@ -8,6 +8,8 @@ import HomePage from "./Pages/HomePage";
 import Services from "./Pages/Services";
 import { Contact } from "./Pages/Contact";
 import AboutUsPage from "./Pages/AboutUsPage";
+import ServiceDetailsPage from "./Pages/ServiceDetailPage";
+import IntroData from "./Pages/IntroData";
 
 function App() {
   return (
@@ -23,6 +25,10 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<AboutUsPage />} />
+            {/* serviceDetailPage */}
+            <Route path="/services/:id" element={<ServiceDetailsPage />} />
+            <Route path="/introData" element={<IntroData />} />
+            <Route path="*" element={<h1>404 Not Found</h1>} />
           </Routes>
 
           {/* start footer */}
