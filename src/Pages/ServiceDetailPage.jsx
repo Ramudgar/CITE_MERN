@@ -1,32 +1,49 @@
 import React from "react";
+import { Link,useLocation,useParams } from "react-router-dom";
 
 export default function ServiceDetailsPage() {
+  const location = useLocation();
+  const { id } = useParams();
+  const { service } = location.state || {};
+    // 1) Prefer fast path from navigation state if it exists
+  // const stateService = location.state?.service;
+
+  // 2) Otherwise look it up from our data source
+  // const fileService = servicesData.find((s) => s.id === id);
+  // const service = stateService ?? fileService;
+   if (!service) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-xl text-red-600">No service data found</h2>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-slate-50">
       {/* CONTAINER */}
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Back link */}
-        <a href="#" className="mb-6 inline-block text-sm text-indigo-600 hover:underline">
+        <Link to="/services" className="mb-6 inline-block text-sm text-indigo-600 hover:underline">
           ← Back to Services
-        </a>
+        </Link>
 
         {/* TITLE */}
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          Premium UI/UX Design Service
+          {service.title || "Service Title"}
         </h1>
 
         {/* META (optional) */}
         <div className="mt-2 text-sm text-slate-500">
           <span>Design & Branding</span>
           <span className="px-2">·</span>
-          <span>2–4 weeks</span>
+          <span>2–4 weeks </span>
         </div>
 
         {/* COVER IMAGE */}
         <div className="mt-6 overflow-hidden rounded-xl">
           <img
-            src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1600&auto=format&fit=crop"
-            alt="Service cover"
+            src={service.image}
+            alt={service.title}
             className="h-64 w-full object-cover sm:h-80"
           />
         </div>
@@ -34,22 +51,7 @@ export default function ServiceDetailsPage() {
         {/* DESCRIPTION */}
         <div className="prose prose-slate mt-6 max-w-none">
           <p>
-            We help you turn ideas into clean, easy-to-use interfaces. This service
-            includes basic research, simple user flows, and a small style guide so
-            your team can start building right away.
-          </p>
-          <p>
-            What you get:
-          </p>
-          <ul>
-            <li>Clear screens for mobile and desktop (Figma)</li>
-            <li>Clickable prototype for demo</li>
-            <li>Exported assets (PNG/SVG)</li>
-          </ul>
-          <p>
-            Simple process: we have a short call, make a draft, review together,
-            and finalize the design. If you are a beginner team, we keep language
-            simple and explain every step.
+            {service.description }
           </p>
         </div>
 

@@ -10,6 +10,7 @@ import { Contact } from "./Pages/Contact";
 import AboutUsPage from "./Pages/AboutUsPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailPage";
 import IntroData from "./Pages/IntroData";
+import Form from "./Components/Form";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
             {/* serviceDetailPage */}
             <Route path="/services/:id" element={<ServiceDetailsPage />} />
             <Route path="/introData" element={<IntroData />} />
+            {/* Beginner Form */}
+            <Route path="/form" element={<Form />} />
             <Route path="*" element={<h1>404 Not Found</h1>} />
           </Routes>
 
