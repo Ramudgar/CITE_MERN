@@ -8,7 +8,12 @@ const dynamicStorage = (uploadType) => {
       cb(null, `public/${uploadType}/`);
     },
     filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname));
+      // take file name without extension and append timestamp
+      const fileName = path.basename(
+        file.originalname,
+        path.extname(file.originalname)
+      );
+      cb(null, fileName + Date.now() + path.extname(file.originalname));
     },
   });
 };
@@ -32,6 +37,23 @@ const uploadProfileImage = multer({
   },
 });
 
+// multer upload instance for blog images
+const uploadBlogImage = multer({
+  storage: dynamicStorage("blogImage"),
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4 MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png/;
+    const mimeType = allowedTypes.test(file.mimetype);
+    const extName = allowedTypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
 
+    if (mimeType && extName) {
+      return cb(null, true);
+    } else {
+      return cb(new Error("Only JPEG, JPG, or PNG images allowed"), false);
+    }
+  },
+});
 
-module.exports = { uploadProfileImage };
+module.exports = { uploadProfileImage, uploadBlogImage };
