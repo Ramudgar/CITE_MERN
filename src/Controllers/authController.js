@@ -1,4 +1,4 @@
-const { User } = require("../Models/userModel");
+const User  = require("../Models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../Config/config");
@@ -50,7 +50,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email })
     if (!user) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
@@ -60,13 +60,22 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
-      expiresIn: config.JWT_EXPIRATION,
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      config.JWT_SECRET,
+      { expiresIn: config.JWT_EXPIRATION }
+    );
 
-    res.status(200).json({ message: "Login successful", token });
+    // Exclude password before sending back user data
+    const { password: _, ...safeUser } = user.toObject();
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: safeUser, // optional, sends user data without password
+    });
   } catch (error) {
-    // console.error("Error logging in user:", error);
+    console.error("Error logging in user:", error);
     res.status(500).json({ error: "Server error. Please try again later." });
   }
 };
