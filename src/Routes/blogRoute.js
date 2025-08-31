@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { createBlog, getAllBlogs } = require("../Controllers/blogController");
+const {
+  createBlog,
+  getAllBlogs,
+  getBlogsByUser,
+  getBlogById,
+} = require("../Controllers/blogController");
 const { uploadBlogImage } = require("../services/fileUploadService");
 const { authenticateUser } = require("../Middleware/authMiddleware");
 
@@ -20,5 +25,23 @@ router.post(
  * @returns response
  */
 router.get("/all", getAllBlogs);
+
+/**
+ * @description get all blogs by a specific user
+ * @api GET /api/v1/blogs/user/:userId
+ * @access Public
+ * @type GET
+ * @returns response
+ */
+router.get("/user/:userId", authenticateUser, getBlogsByUser);
+
+/**
+ * @description get a single blog by its ID
+ * @api GET /api/v1/blogs/:blogId
+ * @access Public
+ * @type GET
+ * @returns response
+ */
+router.get("/:blogId", getBlogById);
 
 module.exports = router;

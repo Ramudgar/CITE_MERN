@@ -1,3 +1,4 @@
+const { authenticateUser } = require("../Middleware/authMiddleware");
 const Blog = require("../Models/blogModel");
 
 // Create a new blog post
@@ -36,7 +37,7 @@ const createBlog = async (req, res) => {
 // controller function to get all blogs
 const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().populate("author", "username email role");
+    const blogs = await Blog.find().populate("author", " username email");
     return res.status(200).json({
       message: "Blogs fetched successfully",
       blogs,
@@ -47,6 +48,46 @@ const getAllBlogs = async (req, res) => {
   }
 };
 
+// controller function to get all blogs by a specific user
+const getBlogsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const blogs = await Blog.find({ author: userId }).populate(
+      "author",
+      " -_id username  email"
+    );
+    return res.status(200).json({
+      message: "Blogs fetched successfully",
+      blogs,
+    });
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// controller function to get a single blog by its ID
+
+const getBlogById = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const blog = await Blog.findById({ _id: blogId }).populate(
+      "author",
+      " username email"
+    );
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    return res.status(200).json({
+      message: "Blog fetched successfully",
+      blog,
+    });
+  } catch (error) {
+    console.error("Error fetching blog:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Export the controller function
 
-module.exports = { createBlog, getAllBlogs };
+module.exports = { createBlog, getAllBlogs, getBlogsByUser, getBlogById };
