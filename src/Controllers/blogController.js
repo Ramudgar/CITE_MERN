@@ -1,4 +1,3 @@
-const { authenticateUser } = require("../Middleware/authMiddleware");
 const Blog = require("../Models/blogModel");
 
 // Create a new blog post
@@ -88,6 +87,42 @@ const getBlogById = async (req, res) => {
   }
 };
 
+// controller for update the blog
+const updateBlog = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const { title, content } = req.body;
+    // console.log(title)
+
+    // Find the blog by ID
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    // user another apprach to udate  the blog fields using ternary operator
+    blog.title = title ? title.trim() : blog.title;
+    blog.content = content ? content.trim() : blog.content;
+
+    // Handle image if uploaded
+    if (req.file) {
+      blog.imageUrl = `/public/blogImage/${req.file.filename}`;
+    }
+
+    
+
+    // Save the updated blog
+    await blog.save();
+
+    return res.status(200).json({
+      message: "Blog updated successfully",
+      blog,
+    });
+  } catch (error) {
+    console.error("Error updating blog:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Export the controller function
 
-module.exports = { createBlog, getAllBlogs, getBlogsByUser, getBlogById };
+module.exports = { createBlog, getAllBlogs, getBlogsByUser, getBlogById, updateBlog };

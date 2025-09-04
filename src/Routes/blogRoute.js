@@ -5,6 +5,7 @@ const {
   getAllBlogs,
   getBlogsByUser,
   getBlogById,
+  updateBlog,
 } = require("../Controllers/blogController");
 const { uploadBlogImage } = require("../services/fileUploadService");
 const { authenticateUser } = require("../Middleware/authMiddleware");
@@ -43,5 +44,23 @@ router.get("/user/:userId", authenticateUser, getBlogsByUser);
  * @returns response
  */
 router.get("/:blogId", getBlogById);
+
+/**
+ * @description update a blog by its ID
+ * @api PUT /api/v1/blogs/:blogId
+ * @access Private
+ * @type PUT
+ * @returns response
+ */
+router.put(
+  "/:blogId",
+  authenticateUser,
+  uploadBlogImage.single("imageUrl"),
+  updateBlog
+);
+
+/**
+ * Note: The delete blog route is intentionally omitted as per the requirement.
+ */
 
 module.exports = router;
