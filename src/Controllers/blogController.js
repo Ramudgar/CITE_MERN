@@ -108,8 +108,6 @@ const updateBlog = async (req, res) => {
       blog.imageUrl = `/public/blogImage/${req.file.filename}`;
     }
 
-    
-
     // Save the updated blog
     await blog.save();
 
@@ -123,6 +121,122 @@ const updateBlog = async (req, res) => {
   }
 };
 
+// controller for delete the blog
+const deleteBlog = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+
+    // Find the blog by ID and delete it
+    const blog = await Blog.findByIdAndDelete(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    return res.status(200).json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// controller to search blogs by title or content (with pagination) 
+/**
+ * Searches for blogs using an optimized text index and includes pagination.
+ */
+// const searchBlogs = async (req, res) => {
+//   try {
+//     // 1. Destructure and set defaults for pagination
+//     const { query, page = 1, limit = 10 } = req.query;
+
+//     // 2. More robust validation
+//     if (!query || query.trim().length < 2) {
+//       return res.status(400).json({
+//         message: "Search query is required and must be at least 2 characters long",
+//       });
+//     }
+
+//     // 3. Use the $text operator for efficient searching
+//     // This requires a text index to be created on the collection
+//     const searchQuery = { $text: { $search: query } };
+
+//     // Calculate the number of documents to skip for pagination
+//     const skip = (parseInt(page) - 1) * parseInt(limit);
+
+//     // 4. Execute queries in parallel for better performance
+//     const [blogs, totalCount] = await Promise.all([
+//       Blog.find(searchQuery)
+//         .populate("author", "username email")
+//         // Sort by the relevance score provided by the text search
+//         .sort({ score: { $meta: "textScore" } })
+//         .skip(skip)
+//         .limit(parseInt(limit)),
+//       Blog.countDocuments(searchQuery)
+//     ]);
+
+//     // 5. Return a structured response with pagination metadata
+//     return res.status(200).json({
+//       message: "Search results",
+//       data: {
+//         blogs,
+//         pagination: {
+//           total: totalCount,
+//           page: parseInt(page),
+//           limit: parseInt(limit),
+//           totalPages: Math.ceil(totalCount / limit),
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error searching blogs:", error);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+const searchBlogs = async (req, res) => {
+  try {
+    const { query, page = 1, limit = 10 } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const blogs = await Blog.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } },
+      ],
+    })
+      .populate("author", "username email")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Blog.countDocuments({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    return res.status(200).json({
+      message: "Search results",
+      blogs,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
+  } catch (error) {
+    console.error("Error searching blogs:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Export the controller function
 
-module.exports = { createBlog, getAllBlogs, getBlogsByUser, getBlogById, updateBlog };
+module.exports = {
+  createBlog,
+  getAllBlogs,
+  getBlogsByUser,
+  getBlogById,
+  updateBlog,
+  deleteBlog,
+  searchBlogs,
+};

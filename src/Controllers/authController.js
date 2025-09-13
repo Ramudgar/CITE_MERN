@@ -1,4 +1,4 @@
-const User  = require("../Models/userModel");
+const User = require("../Models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../Config/config");
@@ -50,7 +50,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
@@ -60,11 +60,9 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRATION }
-    );
+    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: config.JWT_EXPIRATION,
+    });
 
     // Exclude password before sending back user data
     const { password: _, ...safeUser } = user.toObject();
@@ -80,4 +78,30 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+// controller functions to get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Server error. Please try again later." });
+  }
+};
+
+// controller functions to delete a user by ID (optional enhancement) --- IGNORE ---
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Server error. Please try again later." });
+  }
+};
+// export the controller functions
+module.exports = { register, login, getAllUsers, deleteUser };

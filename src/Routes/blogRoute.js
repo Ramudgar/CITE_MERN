@@ -6,6 +6,8 @@ const {
   getBlogsByUser,
   getBlogById,
   updateBlog,
+  deleteBlog,
+  searchBlogs,
 } = require("../Controllers/blogController");
 const { uploadBlogImage } = require("../services/fileUploadService");
 const { authenticateUser } = require("../Middleware/authMiddleware");
@@ -60,7 +62,22 @@ router.put(
 );
 
 /**
- * Note: The delete blog route is intentionally omitted as per the requirement.
+ * @description delete a blog by its ID
+ * @api DELETE /api/v1/blogs/:blogId
+ * @access Private
+ * @type DELETE
+ * @returns response
  */
+router.delete("/:blogId", authenticateUser, deleteBlog);
 
+/**
+ * @description search blogs by title or content
+ * @api GET /api/v1/blogs/list/search?query=keyword&page=1&limit=10
+ * @access Public
+ * @type GET
+ * @returns JSON response with blogs, total count, page, and limit
+ */
+router.get("/list/search", searchBlogs);
+
+// export the router
 module.exports = router;
